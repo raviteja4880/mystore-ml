@@ -15,3 +15,8 @@ def cart_recommendations(cart_items: list[str]):
     return {
         "recommendations": recommend_from_cart(cart_items)
     }
+
+@app.get("/health")
+def health():
+    return {"status": "ok"}
+
