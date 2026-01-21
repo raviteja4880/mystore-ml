@@ -1,8 +1,6 @@
 from fastapi import FastAPI
-from model.recommender import (
-    recommend_by_product,
-    recommend_from_cart
-)
+from model.recommender import recommend_by_product, recommend_from_cart
+from api.retrain_api import router as retrain_router
 
 app = FastAPI(title="MyStore ML Recommendation API")
 
@@ -12,11 +10,10 @@ def product_recommendations(external_id: str):
 
 @app.post("/recommend/cart")
 def cart_recommendations(cart_items: list[str]):
-    return {
-        "recommendations": recommend_from_cart(cart_items)
-    }
+    return {"recommendations": recommend_from_cart(cart_items)}
 
 @app.get("/health")
 def health():
     return {"status": "ok"}
 
+app.include_router(retrain_router)
