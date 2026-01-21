@@ -5,3 +5,4 @@ numpy
 scikit-learn
 pymongo
 python-dotenv
+python-jose[cryptography]
