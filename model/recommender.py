@@ -15,6 +15,62 @@ index_map = {
 # Minimum similarity threshold (important)
 MIN_SCORE = 0.05
 
+# ===============================
+# Utility: Seeded Shuffle
+# ===============================
+def seeded_shuffle(items, seed: str):
+    hash_val = 0
+    for c in seed:
+        hash_val = ord(c) + ((hash_val << 5) - hash_val)
+
+    items = items.copy()
+    for i in range(len(items) - 1, 0, -1):
+        hash_val = (hash_val * 9301 + 49297) % 233280
+        j = hash_val % (i + 1)
+        items[i], items[j] = items[j], items[i]
+
+    return items
+
+# ===============================
+# HOME (USER + DAILY) RECOMMENDATION
+# ===============================
+def recommend_home(seed: str, top_n=4):
+    """
+    Deterministic daily recommendations per user.
+    Uses seeded shuffle over product corpus.
+    """
+
+    if products.empty:
+        return []
+
+    # Convert dataframe rows to lightweight dicts
+    items = products[["externalId", "name", "brand", "price", "category"]].to_dict("records")
+
+    # Deterministic shuffle
+    shuffled = seeded_shuffle(items, seed)
+
+    recommendations = []
+    seen_categories = set()
+
+    for product in shuffled:
+        # Optional: category diversity (comment out if not needed)
+        if product["category"] in seen_categories:
+            continue
+
+        recommendations.append({
+            "externalId": product["externalId"],
+            "name": product["name"],
+            "brand": product["brand"],
+            "price": int(product["price"]),
+            "score": 1.0  # static score for home
+        })
+
+        seen_categories.add(product["category"])
+
+        if len(recommendations) == top_n:
+            break
+
+    return recommendations
 
 # ===============================
 # PRODUCT-BASED RECOMMENDATION
